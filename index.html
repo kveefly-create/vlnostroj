@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Vlnostroj – soutěž pro 2. ročník: naučte stroj fyziku mechanického vlnění.">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Vlnostroj</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Figtree:wght@400;500;600;700&family=STIX+Two+Text:ital@0;1&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+:root{
+  --bg:#fbf8f5; --surface:#ffffff; --surface-2:#f3ece6; --ink:#2e1f1a; --ink-2:#6e5d52; --line:#e5dad1;
+  --band:#523e32; --band-ink:#fbf4ee; --taupe:#9e8a7c;
+  --pink:#b8339f; --pink-fill:#f08fe8; --pink-soft:#fbe3f8;
+  --green:#2e7d30; --green-fill:#a9dd6c; --green-soft:#e2f2d6;
+  --bad:#b83a26; --bad-soft:#f8e0da; --focus:#b8339f;
+  --display:"Playfair Display", Georgia, "Times New Roman", serif;
+  --body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --math:"STIX Two Text", "Cambria Math", "Times New Roman", serif;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#2a1c17; --surface:#36261f; --surface-2:#433027; --ink:#f7eee8; --ink-2:#cbb9ad; --line:#58443a;
+    --band:#523e32; --band-ink:#fbf4ee; --taupe:#b4a193;
+    --pink:#f39be9; --pink-fill:#f08fe8; --pink-soft:#583250;
+    --green:#b3e27a; --green-fill:#a9dd6c; --green-soft:#33452a;
+    --bad:#ff937c; --bad-soft:#56302a; --focus:#f39be9;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#2a1c17; --surface:#36261f; --surface-2:#433027; --ink:#f7eee8; --ink-2:#cbb9ad; --line:#58443a;
+  --band:#523e32; --band-ink:#fbf4ee; --taupe:#b4a193;
+  --pink:#f39be9; --pink-fill:#f08fe8; --pink-soft:#583250;
+  --green:#b3e27a; --green-fill:#a9dd6c; --green-soft:#33452a;
+  --bad:#ff937c; --bad-soft:#56302a; --focus:#f39be9;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 var(--body);}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:0 64px}
+h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.15;text-wrap:balance;margin:0}
+p{margin:0}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+/* header band — like the title slide */
+.band{background:var(--band);color:var(--band-ink)}
+.band .wrap{padding-block:28px 22px;display:flex;flex-wrap:wrap;gap:18px 32px;align-items:flex-end;justify-content:space-between}
+.band small{display:block;font-size:13px;letter-spacing:.08em;text-transform:uppercase;opacity:.75;margin-bottom:6px}
+.band h1{font-size:clamp(34px,6vw,58px)}
+.band h1 em{font-style:italic;color:var(--pink-fill)}
+.dots{display:flex;align-items:center}
+.dots span{width:44px;height:44px;border-radius:50%;margin-left:-12px}
+.dots span:nth-child(1){background:#fff;margin-left:0}
+.dots span:nth-child(2){background:#9e8a7c}
+.dots span:nth-child(3){background:#f08fe8}
+.dots span:nth-child(4){background:#2e8b30;margin-left:14px}
+.teamtag{font-size:14px;opacity:.9}
+.teamtag b{font-weight:600}
+
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+nav.tabs .wrap{padding-block:0;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav.tabs button{background:none;border:0;padding:14px 14px 12px;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;color:var(--ink-2);font-weight:500}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--pink-fill)}
+nav.tabs button .pts{font-family:var(--mono);font-size:12px;margin-left:6px;color:var(--green)}
+
+section.view{padding-top:32px}
+.lede{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:28px;align-items:start;margin-bottom:28px}
+.lede h2{font-size:clamp(28px,4vw,40px);margin-bottom:10px}
+.lede p{color:var(--ink-2);max-width:62ch}
+.learn{display:grid;gap:10px}
+.learn div{padding:12px 14px;border-radius:12px;background:var(--surface-2);font-size:14.5px}
+.learn b{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}
+.learn .ml b{color:var(--pink)} .learn .fy b{color:var(--green)}
+
+.grid2{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:24px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px}
+.panel h3{font-size:22px;margin-bottom:6px}
+.panel .sub{color:var(--ink-2);font-size:14.5px;margin-bottom:16px}
+.step{font-family:var(--mono);font-size:12px;color:var(--pink);letter-spacing:.04em;margin-bottom:4px;display:block}
+.stack{display:grid;gap:24px}
+
+.eq{font-family:var(--math);font-size:19px;line-height:1.3}
+.eq i{font-style:italic}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px 12px 10px;display:grid;gap:10px;background:var(--bg)}
+.card.flag{border-color:var(--bad);background:var(--bad-soft)}
+.card .flagnote{font-size:12.5px;color:var(--bad);font-weight:600}
+.seg{display:flex;gap:6px}
+.seg button{flex:1;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 8px;font-size:13.5px;cursor:pointer}
+.seg button[aria-pressed="true"][data-v="0"]{background:var(--pink-soft);border-color:var(--pink);color:var(--ink);font-weight:600}
+.seg button[aria-pressed="true"][data-v="1"]{background:var(--green-soft);border-color:var(--green);color:var(--ink);font-weight:600}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:7px 12px;cursor:pointer;font-size:14px;background:var(--bg);user-select:none}
+.chip input{accent-color:var(--pink);margin:0}
+.chip:has(input:checked){border-color:var(--pink);background:var(--pink-soft)}
+
+.btn{border:0;border-radius:999px;padding:10px 18px;font-weight:600;cursor:pointer;background:var(--ink);color:var(--bg)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.pink{background:var(--pink-fill);color:#2e1f1a}
+.btn.warn{background:var(--bad);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.muted{color:var(--ink-2);font-size:14px}
+.note{font-size:14px;padding:10px 12px;border-radius:10px;background:var(--surface-2)}
+.note.bad{background:var(--bad-soft);color:var(--ink)}
+.note.good{background:var(--green-soft)}
+
+.brain{display:grid;gap:8px;margin-top:6px}
+.wrow{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1.6fr) 44px;gap:10px;align-items:center;font-size:13.5px}
+.wbar{height:12px;background:var(--surface-2);border-radius:6px;position:relative;overflow:hidden}
+.wbar::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--taupe)}
+.wbar span{position:absolute;top:0;bottom:0;border-radius:6px;transition:all .15s}
+.wval{font-family:var(--mono);font-size:12.5px;text-align:right}
+.legend{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2);margin-top:2px}
+
+.bignum{font-family:var(--display);font-size:46px;line-height:1}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14.5px}
+.kv dt{color:var(--ink-2)} .kv dd{margin:0;font-family:var(--mono);font-size:14px}
+
+.tests{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.tcase{border-radius:10px;padding:8px 10px;font-size:15px;border:1px solid var(--line);display:grid;gap:4px}
+.tcase .eq{font-size:16px}
+.tcase.ok{background:var(--green-soft);border-color:transparent}
+.tcase.no{background:var(--bad-soft);border-color:var(--bad)}
+.tcase small{font-size:12px;color:var(--ink-2)}
+
+.result{border:2px dashed var(--pink);border-radius:16px;padding:16px 18px;display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center}
+.result .code{font-family:var(--mono);font-size:26px;letter-spacing:.06em}
+.result .lbl{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2)}
+
+/* round 2 */
+.plots{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.plot h4{margin:0 0 6px;font-weight:600;font-size:14px}
+.plot canvas{width:100%;height:230px;display:block;background:var(--bg);border-radius:10px;border:1px solid var(--line)}
+.sliders{display:grid;gap:14px}
+.sl label{display:flex;justify-content:space-between;font-size:14.5px;margin-bottom:2px}
+.sl label b{font-family:var(--mono);font-weight:500}
+.sl input[type=range]{width:100%;accent-color:var(--pink)}
+#spark{width:100%;height:60px;display:block}
+.answers{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.field label{display:block;font-size:13.5px;color:var(--ink-2);margin-bottom:4px}
+.field input{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-family:var(--mono);font-size:15px}
+.field input.ok{border-color:var(--green);background:var(--green-soft)}
+.field input.no{border-color:var(--bad);background:var(--bad-soft)}
+.inlineq{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-family:var(--math);font-size:20px}
+.inlineq input{width:88px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font-family:var(--mono);font-size:15px}
+
+/* tables */
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2)}
+td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+td input{width:96px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font-family:var(--mono);font-size:14px}
+tr.win td{background:var(--pink-soft)}
+.hyps{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.hyp{border:1px solid var(--line);border-radius:12px;padding:12px}
+.hyp h4{margin:0 0 8px;font-family:var(--math);font-size:20px;font-weight:400}
+.hyp ol{margin:0;padding-left:20px;font-size:14px;display:grid;gap:3px}
+.hyp li.pick{font-weight:700;color:var(--pink)}
+.hyp li span{font-family:var(--mono);font-size:12.5px;color:var(--ink-2);margin-left:6px}
+
+.gloss{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.gloss div{padding:14px;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
+.gloss dt{font-family:var(--display);font-size:19px;margin-bottom:4px}
+.gloss dd{margin:0;font-size:14.5px;color:var(--ink-2)}
+.rounds{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.rcard{padding:18px;border-radius:16px;background:var(--surface);border:1px solid var(--line);display:grid;gap:8px;align-content:start}
+.rcard .num{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-size:18px;color:#2e1f1a}
+.rcard h3{font-size:22px}
+.rcard p{font-size:14.5px;color:var(--ink-2)}
+.teamform{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.teamform input{padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:17px;min-width:0;width:min(320px,100%)}
+.gate{padding:24px;border-radius:16px;background:var(--surface-2);text-align:center}
+.prose{max-width:72ch;display:grid;gap:12px}
+.prose h3{font-size:24px;margin-top:14px}
+.prose ul,.prose ol{margin:0;padding-left:22px;display:grid;gap:4px}
+pre.code{background:var(--surface-2);border-radius:12px;padding:14px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.5;margin:0}
+details.key{border:1px solid var(--line);border-radius:12px;padding:12px 16px;background:var(--surface)}
+details.key summary{cursor:pointer;font-weight:600}
+
+@media (max-width:860px){
+  .lede,.grid2{grid-template-columns:1fr}
+  .plots{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header class="band">
+  <div class="wrap">
+    <div>
+      <small>Fyzika / 2. ročník · Mechanické vlnění II · Praktická část</small>
+      <h1>Vlnostroj: <em>naučte stroj</em> fyziku vlnění</h1>
+    </div>
+    <div class="row" style="gap:18px">
+      <span class="teamtag" id="teamtag">Tým zatím nezadán</span>
+      <div class="dots" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Části soutěže">
+  <div class="wrap" role="tablist" id="tabs"></div>
+</nav>
+
+<main class="wrap">
+  <section class="view" id="v-uvod"></section>
+  <section class="view" id="v-k1" hidden></section>
+  <section class="view" id="v-k2" hidden></section>
+  <section class="view" id="v-k3" hidden></section>
+  <section class="view" id="v-body" hidden></section>
+  <section class="view" id="v-ucitel" hidden></section>
+</main>
+
+<script>
+/* ============ utilities ============ */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const fmt = (n, d=3) => { if(n==null || !isFinite(n)) return '—'; const s = String(+(+n).toFixed(d)); return s.replace('.', ',').replace('-', '−'); };
+const parseNum = s => { if(s==null) return NaN; s = String(s).trim().replace(/\s/g,'').replace('−','-').replace(',', '.'); if(s==='') return NaN; return Number(s); };
+const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function hashStr(s){ let h1=0xdeadbeef, h2=0x41c6ce57; for(let i=0;i<s.length;i++){const c=s.charCodeAt(i); h1=Math.imul(h1^c,2654435761); h2=Math.imul(h2^c,1597334677);} h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909); h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909); return (4294967296*(2097151&h2)+(h1>>>0)); }
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+const normTeam = t => t.trim().toLowerCase().replace(/\s+/g,' ');
+const rngFor = (team, salt) => mulberry32(hashStr('vlnostroj|'+normTeam(team)+'|'+salt) % 4294967296);
+const pick = (r, a) => a[Math.floor(r()*a.length)];
+const shuffle = (r, a) => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; };
+const gauss = r => { let u=0,v=0; while(!u) u=r(); while(!v) v=r(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); };
+const scoreCode = (team, round, score) => score + '-' + (hashStr('kod|'+normTeam(team)+'|'+round+'|'+score) % 1679616).toString(36).toUpperCase().padStart(4,'0');
+const relErr = (x, ref) => Math.abs(x-ref)/Math.abs(ref);
+
+/* ============ state ============ */
+const KEY = 'vlnostroj-v1', BKEY = 'vlnostroj-tabule-v1';
+const fresh = () => ({ tab:'uvod', team:'',
+  k1:{labels:{}, feats:['pi','minus'], attempts:0, lastAcc:null, trained:false, submitted:null},
+  k2:{p:[3,0.6,1.5], answers:{}, submitted:null},
+  k3:{inputs:{}, learned:null, attempts:0, lastTest:null, submitted:null, solve:{A:'0,006', a:'8', b:'5'}} });
+let S = fresh();
+try { const raw = localStorage.getItem(KEY); if(raw){ const o = JSON.parse(raw); S = Object.assign(fresh(), o); S.k1 = Object.assign(fresh().k1, o.k1||{}); S.k2 = Object.assign(fresh().k2, o.k2||{}); S.k3 = Object.assign(fresh().k3, o.k3||{}); } } catch(e){}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} };
+
+/* ============ tabs ============ */
+const TABS = [
+  {id:'uvod', t:'Úvod a pravidla'},
+  {id:'k1', t:'1. kolo · Kmitání, nebo vlnění?', r:'k1'},
+  {id:'k2', t:'2. kolo · Stroj měří vlnu', r:'k2'},
+  {id:'k3', t:'3. kolo · Stroj objevuje vzorce', r:'k3'},
+  {id:'body', t:'Tabule výsledků'},
+  {id:'ucitel', t:'Pro učitele'},
+];
+function renderTabs(){
+  $('#tabs').innerHTML = TABS.map(x => {
+    const sub = x.r && S[x.r].submitted ? `<span class="pts">${S[x.r].submitted.score} b.</span>` : '';
+    return `<button role="tab" data-tab="${x.id}" aria-selected="${S.tab===x.id}">${x.t}${sub}</button>`;
+  }).join('');
+  $('#teamtag').innerHTML = S.team ? `Tým: <b>${esc(S.team)}</b>` : 'Tým zatím nezadán';
+}
+$('#tabs').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if(b) go(b.dataset.tab); });
+function go(id){
+  S.tab = id; save(); renderTabs();
+  TABS.forEach(x => $('#v-'+x.id).hidden = x.id !== id);
+  ({uvod:renderUvod, k1:renderK1, k2:renderK2, k3:renderK3, body:renderBoard, ucitel:renderTeacher})[id]();
+  window.scrollTo({top:0});
+}
+const gate = () => `<div class="gate"><h3 style="font-size:24px;margin-bottom:8px">Nejdřív pojmenujte svůj tým</h3><p class="muted" style="margin-bottom:14px">Každý tým dostane vlastní data, a proto stroj potřebuje znát vaše jméno.</p><button class="btn" data-go="uvod">Na úvodní stránku</button></div>`;
+document.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if(g) go(g.dataset.go); });
+
+function resultBox(round, sub){
+  return `<div class="result"><div><div class="lbl">Odevzdáno · ${round}. kolo</div><div class="bignum">${sub.score} <span style="font-size:22px">bodů</span></div></div>
+  <div><div class="lbl">Kód pro učitele</div><div class="code">${sub.code}</div></div>
+  <p class="muted" style="flex-basis:260px;flex-grow:1">Nahlaste učiteli název týmu a tento kód. Učitel ho zapíše na tabuli výsledků, kde se kód ověří.</p></div>`;
+}
+function armConfirm(btn, label, fn){
+  btn.addEventListener('click', () => {
+    if(btn.dataset.armed){ fn(); return; }
+    btn.dataset.armed = '1'; const old = btn.textContent; btn.textContent = label; btn.classList.add('warn');
+    setTimeout(() => { if(btn.isConnected){ delete btn.dataset.armed; btn.textContent = old; btn.classList.remove('warn'); } }, 4000);
+  });
+}
+
+/* ============ ÚVOD ============ */
+function renderUvod(){
+  $('#v-uvod').innerHTML = `
+  <div class="lede">
+    <div>
+      <h2>Stroj nic neví. Naučí se jen to, co ho naučíte vy.</h2>
+      <p>Soutěžíte v týmech. V každém kole naučíte počítač něco z rovnice postupné vlny, kterou už znáte: <span class="eq">y = y<sub>m</sub> · sin 2π(<i>t</i>/<i>T</i> − <i>x</i>/<i>λ</i>)</span>. Stroj se učí z příkladů, které mu připravíte. Když mu dáte špatné příklady, naučí se to špatně. Za každé kolo můžete získat až 100 bodů.</p>
+    </div>
+    <div class="panel">
+      <h3>Váš tým</h3>
+      <p class="sub">Zadejte název týmu. Podle něj se vygenerují vaše vlastní data, takže opisování od sousedů nepomůže.</p>
+      <form class="teamform" id="teamform">
+        <div class="field" style="flex:1"><label for="teamname">Název týmu</label><input id="teamname" maxlength="30" autocomplete="off" value="${esc(S.team)}" placeholder="např. Huygensovi dědici"></div>
+        <button class="btn" type="submit">${S.team ? 'Změnit tým' : 'Začít soutěž'}</button>
+      </form>
+      <p class="muted" id="teammsg" style="margin-top:10px">${S.team ? 'Pokud tým změníte, rozpracovaná kola se vymažou.' : ''}</p>
+    </div>
+  </div>
+
+  <h3 style="font-size:26px;margin:8px 0 14px">Tři kola soutěže</h3>
+  <div class="rounds">
+    <div class="rcard"><div class="num" style="background:var(--pink-fill)">1</div><h3>Kmitání, nebo vlnění?</h3><p><b>Klasifikace.</b> Označíte rovnice jako kmitání nebo vlnění a vyberete, čeho si má stroj všímat. Potom se ukáže, jestli dokáže správně zařadit rovnice, které nikdy neviděl.</p><button class="btn ghost" data-go="k1">Do 1. kola</button></div>
+    <div class="rcard"><div class="num" style="background:var(--green-fill)">2</div><h3>Stroj měří vlnu</h3><p><b>Regrese a učení z chyby.</b> Máte zašuměné měření kmitajícího provazu. Nejdřív odhadnete amplitudu, periodu a vlnovou délku sami, pak je stroj doladí. Z výsledku spočítáte frekvenci, rychlost a rovnici vlny.</p><button class="btn ghost" data-go="k2">Do 2. kola</button></div>
+    <div class="rcard"><div class="num" style="background:#9e8a7c">3</div><h3>Stroj objevuje vzorce</h3><p><b>Učení z příkladů.</b> Vyřešíte tři úlohy z rovnice vlny a stroj z vašich řešení odvodí vzorce pro <i>T</i>, <i>f</i>, <i>λ</i> a <i>v</i>. Pak musí správně vyřešit 30 úloh, které nezná.</p><button class="btn ghost" data-go="k3">Do 3. kola</button></div>
+  </div>
+
+  <h3 style="font-size:26px;margin:36px 0 14px">Slovníček strojového učení</h3>
+  <dl class="gloss">
+    <div><dt>Trénovací data</dt><dd>Příklady, ze kterých se stroj učí. U nás rovnice, měření a vyřešené úlohy.</dd></div>
+    <div><dt>Štítek (label)</dt><dd>Správná odpověď k příkladu, např. „vlnění“. Štítky dodáváte vy, takže musí být správně.</dd></div>
+    <div><dt>Příznak (feature)</dt><dd>Vlastnost, které si stroj všímá, např. „rovnice obsahuje <i>x</i>“. Dobré příznaky jsou polovina úspěchu.</dd></div>
+    <div><dt>Model a váhy</dt><dd>Stroj si ke každému příznaku uloží číslo, tzv. váhu. Ta říká, jak moc daný příznak ovlivňuje odpověď.</dd></div>
+    <div><dt>Chyba (loss)</dt><dd>Číslo, které říká, jak moc se stroj mýlí. Učení znamená chybu postupně zmenšovat.</dd></div>
+    <div><dt>Testovací data</dt><dd>Příklady, které stroj při učení neviděl. Jen na nich se pozná, jestli látku pochopil, nebo se ji jen nabiflil.</dd></div>
+  </dl>`;
+  $('#teamform').addEventListener('submit', e => {
+    e.preventDefault();
+    const v = $('#teamname').value.trim();
+    if(v.length < 2){ $('#teammsg').textContent = 'Název týmu musí mít aspoň 2 znaky.'; return; }
+    if(normTeam(v) !== normTeam(S.team)){ const tab = S.tab; S = fresh(); S.tab = tab; }
+    S.team = v; save(); renderTabs(); go('k1');
+  });
+}
+
+/* ============ KOLO 1 — klasifikace ============ */
+const A_CH = [0.01,0.02,0.03,0.04,0.05];
+const I = s => `<i>${s}</i>`;
+const ym = `${I('y')}<sub>m</sub>`;
+const F0 = {x:0,t:1,pi:0,lam:0,minus:0,cos:0,phi:0,big:0};
+const mk = (h, lab, f) => ({h, lab, f:Object.assign({}, F0, f)});
+const TPL = {
+  k1: r => { const A=pick(r,A_CH), n=pick(r,[2,4,6,10]); return mk(`y = ${fmt(A)} · sin(${n}π${I('t')})`,0,{pi:1,big:+(A>=0.03)}); },
+  k2: () => mk(`y = ${I('A')} · sin(${I('ωt')} + ${I('φ')})`,0,{phi:1}),
+  k3: r => { const A=pick(r,A_CH), T=pick(r,[0.2,0.25,0.5,2]); return mk(`y = ${fmt(A)} · sin(2π${I('t')} / ${fmt(T)})`,0,{pi:1,big:+(A>=0.03)}); },
+  k4: r => { const A=pick(r,A_CH), w=pick(r,[3,5,10,12]); return mk(`y = ${fmt(A)} · cos(${w}${I('t')})`,0,{cos:1,big:+(A>=0.03)}); },
+  k5: r => { const A=pick(r,A_CH), f=pick(r,[2,5,8]), c=pick(r,[0.5,1.5,2.5]); return mk(`y = ${fmt(A)} · sin 2π(${f}${I('t')} − ${fmt(c)})`,0,{pi:1,minus:1,big:+(A>=0.03)}); },
+  k6: () => mk(`y = ${ym} · sin(${I('ωt')} − ${I('φ')})`,0,{minus:1,phi:1}),
+  k7: r => { const A=pick(r,A_CH), w=pick(r,[3,5,10]), n=pick(r,[2,3,4,6]); return mk(`y = ${fmt(A)} · cos(${w}${I('t')} + π/${n})`,0,{cos:1,pi:1,big:+(A>=0.03)}); },
+  v1: () => mk(`y = ${I('A')} · sin(${I('kx')} − ${I('ωt')} + ${I('φ')})`,1,{x:1,lam:1,minus:1,phi:1}),
+  v2: r => { const A=pick(r,A_CH), m=pick(r,[2,4,6]), n=pick(r,[4,8,10]); return mk(`y = ${fmt(A)} · sin(${m}π${I('x')} − ${n}π${I('t')})`,1,{x:1,pi:1,minus:1,big:+(A>=0.03)}); },
+  v3: () => mk(`y = ${ym} · sin 2π(${I('t')}/${I('T')} − ${I('x')}/${I('λ')})`,1,{x:1,pi:1,lam:1,minus:1}),
+  v4: r => { const mm=pick(r,[2,4,6,8]), a=pick(r,[5,8,10,20]), b=pick(r,[2,4,5]); return mk(`y = ${mm} · 10<sup>−3</sup> · sin 2π(${a}${I('t')} − ${b}${I('x')})`,1,{x:1,pi:1,minus:1}); },
+  v5: () => mk(`y = ${ym} · sin ${I('ω')}(${I('t')} − ${I('x')}/${I('v')})`,1,{x:1,minus:1}),
+  v6: r => { const A=pick(r,A_CH), w=pick(r,[4,6,10]), k=pick(r,[2,3,5]); return mk(`y = ${fmt(A)} · cos(${w}${I('t')} + ${k}${I('x')})`,1,{x:1,cos:1,big:+(A>=0.03)}); },
+  v7: r => { const A=pick(r,A_CH), w=pick(r,[4,8,12]), k=pick(r,[2,3,6]); return mk(`y = ${fmt(A)} · sin(${k}${I('x')} + ${w}${I('t')})`,1,{x:1,big:+(A>=0.03)}); },
+};
+const KT = ['k1','k2','k3','k4','k5','k6','k7'], VT = ['v1','v2','v3','v4','v5','v6','v7'];
+const FEATS = [
+  {id:'x', n:`Obsahuje polohu ${I('x')}`},
+  {id:'t', n:`Obsahuje čas ${I('t')}`},
+  {id:'pi', n:'Obsahuje číslo π'},
+  {id:'lam', n:`Obsahuje ${I('λ')} nebo ${I('k')}`},
+  {id:'minus', n:'V závorce je minus'},
+  {id:'cos', n:'Používá cos místo sin'},
+  {id:'phi', n:`Obsahuje fázi ${I('φ')}`},
+  {id:'big', n:'Amplituda aspoň 3 cm'},
+];
+const featName = id => FEATS.find(f => f.id===id).n;
+function k1Data(team){
+  const r = rngFor(team,'k1train');
+  const ks = ['k5', ...shuffle(r, KT.filter(k=>k!=='k5')).slice(0,5)];
+  const vs = [pick(r,['v6','v7']), ...shuffle(r, VT.filter(v=>v!=='v6'&&v!=='v7')).slice(0,5)];
+  const train = shuffle(r, [...ks, ...vs]).map(k => TPL[k](r));
+  const rt = rngFor(team,'k1test');
+  const test = shuffle(rt, [...Array(10)].map(() => TPL[pick(rt,KT)](rt)).concat([...Array(10)].map(() => TPL[pick(rt,VT)](rt))));
+  return {train, test};
+}
+function perceptron(examples, feats){
+  let w = feats.map(()=>0), b = 0; const hist = [];
+  for(let ep=0; ep<20; ep++){
+    let err = 0;
+    for(const e of examples){
+      const x = feats.map(k => e.f[k]); const s = x.reduce((a,xi,i)=>a+xi*w[i], b);
+      const p = s > 0 ? 1 : -1; const y = e.lab ? 1 : -1;
+      if(p !== y){ w = w.map((wi,i)=>wi + y*x[i]); b += y; err++; }
+    }
+    hist.push({w:w.slice(), b, err});
+    if(!err) break;
+  }
+  return hist;
+}
+const predict = (m, feats, e) => (feats.reduce((a,k,i)=>a+e.f[k]*m.w[i], m.b) > 0) ? 1 : 0;
+let K1 = null, K1model = null, K1timer = null;
+function renderK1(){
+  const v = $('#v-k1');
+  if(!S.team){ v.innerHTML = gate(); return; }
+  K1 = k1Data(S.team);
+  const s = S.k1, done = !!s.submitted;
+  v.innerHTML = `
+  <div class="lede">
+    <div><h2>Kmitání, nebo vlnění?</h2>
+      <p>Naučte stroj poznat, jestli rovnice popisuje <b>kmitání</b> (jeden bod, veličina závisí jen na čase) nebo <b>postupné vlnění</b> (závisí na čase i poloze). Stroj je jednoduchý neuron, tzv. <i>perceptron</i>. Rovnice neumí číst, vidí jen příznaky, které mu vyberete.</p></div>
+    <div class="learn"><div class="ml"><b>Strojové učení</b>klasifikace, štítky, příznaky, váhy, trénovací a testovací data</div><div class="fy"><b>Fyzika</b>rozdíl mezi y = f(t) a y = f(t, x) a různé zápisy rovnice vlny</div></div>
+  </div>
+  <div class="grid2">
+    <div class="panel">
+      <span class="step">KROK 1 · ŠTÍTKY</span>
+      <h3>Připravte trénovací data</h3>
+      <p class="sub">Ke každé rovnici přiřaďte správný štítek. Pozor: když se spletete vy, naučí se chybu i stroj.</p>
+      <div class="cards" id="k1cards">${K1.train.map((e,i) => `
+        <div class="card" data-i="${i}"><div class="eq">${e.h}</div>
+          <div class="seg"><button data-v="0" aria-pressed="${s.labels[i]===0}" ${done?'disabled':''}>Kmitání</button><button data-v="1" aria-pressed="${s.labels[i]===1}" ${done?'disabled':''}>Vlnění</button></div>
+        </div>`).join('')}</div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <span class="step">KROK 2 · PŘÍZNAKY</span>
+        <h3>Čeho si má stroj všímat?</h3>
+        <p class="sub">Vyberte příznaky. Každý příznak navíc (nad jeden) stojí 3 body, protože jednodušší model je lepší model.</p>
+        <div class="chips" id="k1feats">${FEATS.map(f => `<label class="chip"><input type="checkbox" value="${f.id}" ${s.feats.includes(f.id)?'checked':''} ${done?'disabled':''}>${f.n}</label>`).join('')}</div>
+        <div class="row" style="margin-top:16px"><button class="btn" id="k1train" ${done?'disabled':''}>Trénovat stroj</button><span class="muted" id="k1status"></span></div>
+      </div>
+      <div class="panel" id="k1brain"><span class="step">KROK 3 · MOZEK STROJE</span><h3>Váhy</h3><p class="sub">Tady uvidíte, co se stroj naučil. Nejdřív ho natrénujte.</p></div>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:24px" id="k1test"></div>`;
+
+  $('#k1cards').addEventListener('click', e => {
+    const b = e.target.closest('button[data-v]'); if(!b || done) return;
+    const i = +b.closest('.card').dataset.i; s.labels[i] = +b.dataset.v; s.trained = false; save();
+    $$('button', b.parentNode).forEach(x => x.setAttribute('aria-pressed', x===b));
+    k1Stale();
+  });
+  $('#k1feats').addEventListener('change', () => { s.feats = $$('#k1feats input:checked').map(x=>x.value); s.trained = false; save(); k1Stale(); });
+  $('#k1train').addEventListener('click', k1Train);
+  if(s.trained) k1Train(true); else k1Stale();
+}
+function k1Stale(){
+  K1model = null;
+  const s = S.k1, n = Object.keys(s.labels).length;
+  $('#k1status').textContent = n < K1.train.length ? `Označeno ${n} z ${K1.train.length} rovnic.` : (s.feats.length ? 'Připraveno k tréninku.' : 'Vyberte aspoň jeden příznak.');
+  $('#k1train').disabled = !!s.submitted || n < K1.train.length || !s.feats.length;
+  if(!s.submitted){
+    $('#k1brain').innerHTML = `<span class="step">KROK 3 · MOZEK STROJE</span><h3>Váhy</h3><p class="sub">Tady uvidíte, co se stroj naučil. Nejdřív ho natrénujte.</p>`;
+    k1RenderTest(null);
+  }
+}
+function brainHTML(feats, st, ep, total){
+  const max = Math.max(1, ...st.w.map(Math.abs), Math.abs(st.b));
+  const bar = v => { const w = Math.abs(v)/max*50; return `<span style="${v>=0?'left:50%':'right:50%'};width:${w}%;background:${v>=0?'var(--green-fill)':'var(--pink-fill)'}"></span>`; };
+  return `<span class="step">KROK 3 · MOZEK STROJE</span><h3>Váhy po ${ep}. průchodu daty</h3>
+   <p class="sub">${st.err ? `V tomto průchodu se stroj spletl ${st.err}× a pokaždé si váhy trochu opravil.` : 'Stroj už v trénovacích datech nedělá žádnou chybu. Učení skončilo.'}${ep===total && st.err ? ' <b>Po 20 průchodech to stroj vzdal: s těmito příznaky a štítky se nedá rozhodovat bez chyby.</b>' : ''}</p>
+   <div class="brain">${feats.map((f,i) => `<div class="wrow"><span>${featName(f)}</span><div class="wbar">${bar(st.w[i])}</div><span class="wval">${fmt(st.w[i],0)}</span></div>`).join('')}
+   <div class="wrow"><span class="muted">práh (bias)</span><div class="wbar">${bar(st.b)}</div><span class="wval">${fmt(st.b,0)}</span></div></div>
+   <div class="legend"><span>← táhne ke kmitání</span><span>táhne k vlnění →</span></div>`;
+}
+function k1Train(instant){
+  const s = S.k1; clearInterval(K1timer);
+  const ex = K1.train.map((e,i) => ({f:e.f, lab:s.labels[i]}));
+  const feats = s.feats.slice(); const hist = perceptron(ex, feats);
+  let i = 0;
+  const show = () => {
+    $('#k1brain').innerHTML = brainHTML(feats, hist[i], i+1, 20);
+    if(i === hist.length-1){ clearInterval(K1timer); K1model = {w:hist[i].w, b:hist[i].b, feats}; s.trained = true; save(); k1RenderTest(null); }
+    i++;
+  };
+  if(instant === true){ i = hist.length-1; show(); } else { show(); if(hist.length>1) K1timer = setInterval(show, 380); }
+}
+function k1RenderTest(res){
+  const s = S.k1, box = $('#k1test');
+  if(s.submitted && !res) res = k1Evaluate(false);
+  if(!K1model && !s.submitted){ box.innerHTML = `<span class="step">KROK 4 · TEST</span><h3>Zkouška na neznámých rovnicích</h3><p class="sub">Až stroj natrénujete, dostane 20 rovnic, které nikdy neviděl.</p>`; return; }
+  const score = res ? k1Score(res.acc, s.attempts, s.feats.length) : null;
+  box.innerHTML = `<span class="step">KROK 4 · TEST</span><h3>Zkouška na neznámých rovnicích</h3>
+    <p class="sub">Každé další testování stojí 10 bodů, takže nejdřív přemýšlejte a teprve pak testujte. Pokusů zatím: ${s.attempts}.</p>
+    ${s.submitted ? '' : `<div class="row"><button class="btn pink" id="k1go">Otestovat stroj na 20 nových rovnicích</button></div>`}
+    ${res ? `
+      <div class="row" style="margin:18px 0 14px;gap:28px">
+        <div><div class="muted">Úspěšnost na testu</div><div class="bignum">${Math.round(res.acc*100)} %</div></div>
+        <div><div class="muted">Body za kolo</div><div class="bignum">${score}</div></div>
+        <p class="muted" style="flex:1;min-width:220px">Výpočet: ${Math.round(res.acc*100)} − 10 × ${s.attempts-1} (opakované testy) − 3 × ${Math.max(0,s.feats.length-1)} (příznaky navíc)</p>
+      </div>
+      ${res.bad ? `<p class="note bad" style="margin-bottom:12px">Ve vašich trénovacích datech ${res.bad === 1 ? 'je 1 špatný štítek' : res.bad < 5 ? `jsou ${res.bad} špatné štítky` : `je ${res.bad} špatných štítků`}. Jsou označené červeně nahoře. Stroj se učil od vás, i s vašimi chybami.</p>` : `<p class="note good" style="margin-bottom:12px">Všechny vaše štítky byly správně.</p>`}
+      <div class="tests">${res.rows.map(r => `<div class="tcase ${r.ok?'ok':'no'}"><div class="eq">${r.e.h}</div><small>stroj: ${r.p?'vlnění':'kmitání'}${r.ok?'':` · správně: ${r.e.lab?'vlnění':'kmitání'}`}</small></div>`).join('')}</div>
+      ${s.submitted ? `<div style="margin-top:20px">${resultBox(1, s.submitted)}</div>` : `<div class="row" style="margin-top:20px"><button class="btn" id="k1sub">Odevzdat ${score} bodů</button><span class="muted">Nebo upravte štítky či příznaky, znovu natrénujte a otestujte.</span></div>`}
+    ` : ''}`;
+  if(res && !s.submitted) $$('#k1cards .card').forEach(c => { const i=+c.dataset.i; const bad = S.k1.labels[i] !== K1.train[i].lab; c.classList.toggle('flag', bad); });
+  if(s.submitted) $$('#k1cards .card').forEach(c => { const i=+c.dataset.i; c.classList.toggle('flag', S.k1.labels[i] !== K1.train[i].lab); });
+  const go = $('#k1go'); if(go) go.addEventListener('click', () => { s.attempts++; save(); k1RenderTest(k1Evaluate(true)); });
+  const sub = $('#k1sub'); if(sub) armConfirm(sub, 'Opravdu odevzdat? Klikněte znovu', () => { s.submitted = {score, code:scoreCode(S.team,1,score)}; save(); renderTabs(); renderK1(); });
+}
+function k1Evaluate(){
+  const s = S.k1;
+  const m = K1model || (()=>{ const ex = K1.train.map((e,i)=>({f:e.f, lab:s.labels[i]})); const h = perceptron(ex, s.feats); const l = h[h.length-1]; return {w:l.w, b:l.b, feats:s.feats}; })();
+  const rows = K1.test.map(e => { const p = predict(m, m.feats, e); return {e, p, ok:p===e.lab}; });
+  const bad = K1.train.filter((e,i) => s.labels[i] !== e.lab).length;
+  return {rows, acc: rows.filter(r=>r.ok).length/rows.length, bad};
+}
+const k1Score = (acc, att, nf) => Math.max(0, Math.round(acc*100) - 10*Math.max(0,att-1) - 3*Math.max(0,nf-1));
+
+/* ============ KOLO 2 — regrese ============ */
+const P_MIN=[0.2,0.1,0.2], P_MAX=[6,1.5,4], P_R=[5.8,1.4,3.8], P_STEP=[0.1,0.01,0.01];
+function k2Data(team){
+  const r = rngFor(team,'k2');
+  const A = Math.round((1.2 + 3.6*r())*10)/10, T = Math.round((0.28 + 0.62*r())*100)/100, L = Math.round((0.7 + 2.2*r())*100)/100;
+  const dx = [], dt = [];
+  for(let i=0;i<=28;i++){ const x = i*4/28; dx.push({x, y: -A*Math.sin(2*Math.PI*x/L) + 0.09*A*gauss(r)}); }
+  for(let i=0;i<=28;i++){ const t = i*2/28; dt.push({t, y: A*Math.sin(2*Math.PI*t/T) + 0.09*A*gauss(r)}); }
+  return {A,T,L,dx,dt};
+}
+let K2 = null, K2hist = [], K2timer = null;
+const k2Loss = p => { let s=0,n=0; for(const d of K2.dx){ s += (-p[0]*Math.sin(2*Math.PI*d.x/p[2]) - d.y)**2; n++; } for(const d of K2.dt){ s += (p[0]*Math.sin(2*Math.PI*d.t/p[1]) - d.y)**2; n++; } return s/n; };
+function k2Step(lr){
+  const p = S.k2.p, L = k2Loss(p);
+  const g = p.map((v,i) => { const h = P_R[i]*1e-5; const q = p.slice(); q[i] += h; return (k2Loss(q)-L)/h*P_R[i]; });
+  const n = Math.hypot(...g) || 1;
+  S.k2.p = p.map((v,i) => clamp(v - lr*g[i]/n*P_R[i], P_MIN[i], P_MAX[i]));
+}
+function renderK2(){
+  const v = $('#v-k2');
+  if(!S.team){ v.innerHTML = gate(); return; }
+  K2 = k2Data(S.team); K2hist = [k2Loss(S.k2.p)];
+  const s = S.k2, done = !!s.submitted, p = s.p;
+  const ans = [['A','Amplituda y<sub>m</sub> [m]'],['f','Frekvence f [Hz]'],['v','Rychlost vlny v [m·s⁻¹]']];
+  v.innerHTML = `
+  <div class="lede">
+    <div><h2>Stroj měří vlnu</h2>
+      <p>Na provaze běží postupná vlna. Naměřili jsme dvě věci: <b>fotku celého provazu</b> v čase <i>t</i> = 0 s a <b>záznam jednoho bodu</b> v místě <i>x</i> = 0 m. Měření je zašuměné jako v každé skutečné laboratoři. Najděte model <span class="eq">y = y<sub>m</sub> · sin 2π(<i>t</i>/<i>T</i> − <i>x</i>/<i>λ</i>)</span>, který měřeným bodům sedí nejlépe.</p></div>
+    <div class="learn"><div class="ml"><b>Strojové učení</b>chyba modelu (MSE), gradientní sestup, krok učení, lokální minimum</div><div class="fy"><b>Fyzika</b>amplituda, perioda a vlnová délka z grafu, výpočet f = 1/T a v = λ/T</div></div>
+  </div>
+  <div class="panel">
+    <div class="plots">
+      <div class="plot"><h4>Fotka provazu v čase t = 0 s · y [cm] podle x [m]</h4><canvas id="cx"></canvas></div>
+      <div class="plot"><h4>Záznam bodu v místě x = 0 m · y [cm] podle t [s]</h4><canvas id="ct"></canvas></div>
+    </div>
+  </div>
+  <div class="grid2" style="margin-top:24px">
+    <div class="panel">
+      <span class="step">KROK 1 · ČLOVĚK</span>
+      <h3>Nejdřív odhadněte sami</h3>
+      <p class="sub">Posouvejte jezdce, dokud růžová křivka nesedí na body. Periodu vyčtete z pravého grafu, vlnovou délku z levého.</p>
+      <div class="sliders">
+        ${[['A','Amplituda y<sub>m</sub>','cm'],['T','Perioda T','s'],['L','Vlnová délka λ','m']].map((q,i) => `
+          <div class="sl"><label for="sl${i}"><span>${q[1]}</span><b id="sv${i}">${fmt(p[i],2)} ${q[2]}</b></label>
+          <input type="range" id="sl${i}" min="${P_MIN[i]}" max="${P_MAX[i]}" step="${P_STEP[i]}" value="${p[i]}" ${done?'disabled':''}></div>`).join('')}
+      </div>
+    </div>
+    <div class="panel">
+      <span class="step">KROK 2 · STROJ</span>
+      <h3>Stroj zmenšuje chybu</h3>
+      <p class="sub">Chyba je průměr druhých mocnin odchylek bodů od křivky. Při učení se stroj podívá, kterým směrem chyba klesá, a udělá krok tím směrem.</p>
+      <div class="row" style="justify-content:space-between;align-items:flex-end">
+        <div><div class="muted">Chyba modelu (MSE)</div><div class="bignum" id="loss">—</div></div>
+        <div class="field" style="width:170px"><label for="lr">Krok učení</label>
+          <select id="lr" style="width:100%;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--bg)" ${done?'disabled':''}>
+            <option value="0.1">0,1 (obří)</option><option value="0.02" selected>0,02 (velký)</option><option value="0.005">0,005 (střední)</option><option value="0.001">0,001 (malý)</option>
+          </select></div>
+      </div>
+      <canvas id="spark" aria-label="Vývoj chyby"></canvas>
+      <div class="row" style="margin-top:10px"><button class="btn" id="k2one" ${done?'disabled':''}>1 krok učení</button><button class="btn pink" id="k2many" ${done?'disabled':''}>Učit 60 kroků</button></div>
+      <p class="muted" style="margin-top:10px" id="k2tip">Tip: velký krok rychle dojde k cíli, ale pak kolem něj přeskakuje. Na doladění zmenšete krok.</p>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:24px">
+    <span class="step">KROK 3 · FYZIKA</span>
+    <h3>Spočítejte z modelu</h3>
+    <p class="sub">Z nalezené amplitudy, periody a vlnové délky dopočítejte hodnoty níže. Desetinná čárka i tečka fungují. Tolerance je 5 % od skutečné vlny.</p>
+    <div class="answers">${ans.map(q => `<div class="field"><label for="a_${q[0]}">${q[1]}</label><input id="a_${q[0]}" inputmode="decimal" value="${esc(s.answers[q[0]]||'')}" ${done?'disabled':''}></div>`).join('')}</div>
+    <p class="muted" style="margin:18px 0 6px">Rovnice vaší vlny (x v metrech, t v sekundách):</p>
+    <div class="inlineq">y = <span class="muted" style="font-family:var(--body);font-size:15px">y<sub>m</sub></span> · sin 2π( <input id="a_a" inputmode="decimal" aria-label="koeficient u t" value="${esc(s.answers.a||'')}" ${done?'disabled':''}> <i>t</i> − <input id="a_b" inputmode="decimal" aria-label="koeficient u x" value="${esc(s.answers.b||'')}" ${done?'disabled':''}> <i>x</i> )</div>
+    <div id="k2res" style="margin-top:20px"></div>
+  </div>`;
+
+  const upd = () => {
+    const p = S.k2.p; $$('.sl input').forEach((el,i) => { el.value = p[i]; $('#sv'+i).textContent = `${fmt(p[i],2)} ${['cm','s','m'][i]}`; });
+    const L = k2Loss(p); $('#loss').innerHTML = `${fmt(L,3)} <span style="font-size:18px">cm²</span>`;
+    k2Draw(); save();
+  };
+  $$('.sl input').forEach((el,i) => el.addEventListener('input', () => { S.k2.p[i] = +el.value; K2hist.push(k2Loss(S.k2.p)); upd(); }));
+  $('#k2one').addEventListener('click', () => { k2Step(+$('#lr').value); K2hist.push(k2Loss(S.k2.p)); upd(); });
+  $('#k2many').addEventListener('click', () => {
+    clearInterval(K2timer); let n = 0; const lr = +$('#lr').value;
+    K2timer = setInterval(() => { k2Step(lr); K2hist.push(k2Loss(S.k2.p)); upd(); if(++n >= 60) clearInterval(K2timer); }, 35);
+  });
+  ['A','f','v','a','b'].forEach(k => $('#a_'+k).addEventListener('input', e => { S.k2.answers[k] = e.target.value; save(); }));
+  upd(); k2Result();
+}
+function k2Evaluate(){
+  const s = S.k2, t = {A:K2.A/100, f:1/K2.T, v:K2.L/K2.T, a:1/K2.T, b:1/K2.L};
+  const fitPts = e => e<=0.02 ? 14 : e<=0.05 ? 8 : e<=0.10 ? 3 : 0;
+  const fit = [relErr(s.p[0],K2.A), relErr(s.p[1],K2.T), relErr(s.p[2],K2.L)];
+  const W = {A:10, f:12, v:12, a:12, b:12};
+  const ok = {}; let ansPts = 0;
+  for(const k in W){ const x = parseNum(s.answers[k]); ok[k] = isFinite(x) && relErr(x, t[k]) <= 0.05; if(ok[k]) ansPts += W[k]; }
+  const fitTotal = fit.reduce((a,e)=>a+fitPts(e),0);
+  return {fit, fitPts, fitTotal, ok, ansPts, score: fitTotal + ansPts};
+}
+function k2Result(){
+  const s = S.k2, box = $('#k2res');
+  if(!s.submitted){
+    box.innerHTML = `<button class="btn" id="k2sub">Odevzdat 2. kolo</button> <span class="muted">Hodnotí se přesnost modelu (max. 42 b.) a výpočty (max. 58 b.). Odevzdat můžete jen jednou.</span>`;
+    armConfirm($('#k2sub'), 'Opravdu odevzdat? Klikněte znovu', () => { const r = k2Evaluate(); s.submitted = {score:r.score, code:scoreCode(S.team,2,r.score)}; save(); renderTabs(); renderK2(); });
+    return;
+  }
+  const r = k2Evaluate();
+  ['A','f','v','a','b'].forEach(k => $('#a_'+k).classList.add(r.ok[k]?'ok':'no'));
+  const names = ['amplituda','perioda','vlnová délka'];
+  box.innerHTML = `<p class="note" style="margin-bottom:14px">Přesnost modelu: ${r.fit.map((e,i)=>`${names[i]} odchylka ${fmt(e*100,1)} % → ${r.fitPts(e)} b.`).join(' · ')}. Výpočty: ${r.ansPts} b. (zelená pole jsou správně).</p>${resultBox(2, s.submitted)}`;
+}
+function tok(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function setupCanvas(cv){ const dpr = window.devicePixelRatio||1, W = cv.clientWidth, H = cv.clientHeight; cv.width = W*dpr; cv.height = H*dpr; const c = cv.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0); return {c,W,H}; }
+function plot(cv, pts, fn, xmax, xstep, xunit){
+  const {c,W,H} = setupCanvas(cv); if(!W) return;
+  const pad = {l:38,r:12,t:12,b:28}, pw = W-pad.l-pad.r, ph = H-pad.t-pad.b;
+  const X = x => pad.l + x/xmax*pw, Y = y => pad.t + (6-y)/12*ph;
+  c.font = '11px ' + tok('--body'); c.fillStyle = tok('--ink-2'); c.strokeStyle = tok('--line'); c.lineWidth = 1;
+  c.textAlign = 'right'; c.textBaseline = 'middle';
+  for(const y of [-6,-3,0,3,6]){ c.beginPath(); c.moveTo(pad.l, Y(y)); c.lineTo(W-pad.r, Y(y)); c.stroke(); c.fillText(String(y).replace('-','−'), pad.l-6, Y(y)); }
+  c.textAlign = 'center'; c.textBaseline = 'top';
+  for(let x=0; x<=xmax+1e-9; x+=xstep){ c.fillText(fmt(x,2), X(x), H-pad.b+6); }
+  c.textAlign = 'right'; c.fillText(xunit, W-pad.r, H-pad.b+6+0);
+  c.strokeStyle = tok('--taupe'); c.beginPath(); c.moveTo(pad.l, Y(0)); c.lineTo(W-pad.r, Y(0)); c.stroke();
+  c.strokeStyle = tok('--pink-fill'); c.lineWidth = 2.5; c.beginPath();
+  for(let i=0;i<=400;i++){ const x = i/400*xmax, y = clamp(fn(x),-6.5,6.5); i ? c.lineTo(X(x),Y(y)) : c.moveTo(X(x),Y(y)); } c.stroke();
+  c.fillStyle = tok('--ink'); for(const d of pts){ c.beginPath(); c.arc(X(d[0]), Y(d[1]), 3.2, 0, 7); c.fill(); }
+}
+function k2Draw(){
+  if(!K2 || $('#v-k2').hidden) return;
+  const p = S.k2.p;
+  plot($('#cx'), K2.dx.map(d=>[d.x,d.y]), x => -p[0]*Math.sin(2*Math.PI*x/p[2]), 4, 0.5, 'x [m]');
+  plot($('#ct'), K2.dt.map(d=>[d.t,d.y]), t => p[0]*Math.sin(2*Math.PI*t/p[1]), 2, 0.25, 't [s]');
+  const cv = $('#spark'); const {c,W,H} = setupCanvas(cv); if(!W) return;
+  const h = K2hist.slice(-240), mx = Math.max(...h, 1e-6);
+  c.strokeStyle = tok('--line'); c.beginPath(); c.moveTo(0,H-1); c.lineTo(W,H-1); c.stroke();
+  c.strokeStyle = tok('--green'); c.fillStyle = tok('--green-soft'); c.lineWidth = 2;
+  c.beginPath(); h.forEach((v,i) => { const x = h.length>1 ? i/(h.length-1)*W : W, y = H-2 - v/mx*(H-8); i ? c.lineTo(x,y) : c.moveTo(x,y); });
+  c.stroke(); c.lineTo(W,H); c.lineTo(0,H); c.closePath(); c.globalAlpha = .6; c.fill(); c.globalAlpha = 1;
+}
+window.addEventListener('resize', () => k2Draw());
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => k2Draw());
+new MutationObserver(() => k2Draw()).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+
+/* ============ KOLO 3 — objevování vzorců ============ */
+const CANDS = [
+  {n:'a', f:(A,a,b)=>a}, {n:'b', f:(A,a,b)=>b}, {n:'1/a', f:(A,a,b)=>1/a}, {n:'1/b', f:(A,a,b)=>1/b},
+  {n:'a/b', f:(A,a,b)=>a/b}, {n:'b/a', f:(A,a,b)=>b/a}, {n:'a·b', f:(A,a,b)=>a*b}, {n:'1/(a·b)', f:(A,a,b)=>1/(a*b)},
+  {n:'2π·a', f:(A,a,b)=>2*Math.PI*a}, {n:'2π/a', f:(A,a,b)=>2*Math.PI/a}, {n:'2π·b', f:(A,a,b)=>2*Math.PI*b}, {n:'2π/b', f:(A,a,b)=>2*Math.PI/b},
+  {n:'a/(2π)', f:(A,a,b)=>a/(2*Math.PI)}, {n:'y<sub>m</sub>·a', f:(A,a,b)=>A*a},
+];
+const Q = [ {k:'T', n:'T', u:'s', truth:'1/a', label:'perioda'}, {k:'f', n:'f', u:'Hz', truth:'a', label:'frekvence'}, {k:'L', n:'λ', u:'m', truth:'1/b', label:'vlnová délka'}, {k:'v', n:'v', u:'m·s⁻¹', truth:'a/b', label:'rychlost'} ];
+const A_POOL = [2,4,5,8,10,16,20,25,40,50], B_POOL = [0.5,1.25,2,2.5,4,5,8,10];
+function k3Row(r){ let a, b; do { a = pick(r,A_POOL); b = pick(r,B_POOL); } while(a===b); const A = pick(r,[2,3,4,5,6,8])/1000 * pick(r,[1,10]); return {A,a,b}; }
+function k3Data(team){ const r = rngFor(team,'k3'); const rows = []; while(rows.length<3){ const x = k3Row(r); if(x.a*x.b!==1 && !rows.some(y=>y.a===x.a || y.b===x.b)) rows.push(x); } return rows; }
+const eqAB = (A,a,b) => `y = ${fmt(A,4)} · sin 2π(${fmt(a)}${I('t')} − ${fmt(b)}${I('x')})`;
+let K3 = null;
+function k3Learn(){
+  const s = S.k3, out = {};
+  for(const q of Q){
+    const rows = K3.map((r,i) => ({r, y: parseNum(s.inputs[q.k+i])})).filter(o => isFinite(o.y) && o.y !== 0);
+    if(!rows.length){ out[q.k] = null; continue; }
+    const ranked = CANDS.map(c => ({n:c.n, err: rows.reduce((a,o)=>a+relErr(c.f(o.r.A,o.r.a,o.r.b), o.y),0)/rows.length})).sort((x,y)=>x.err-y.err);
+    out[q.k] = {pick: ranked[0].n, err: ranked[0].err, top: ranked.slice(0,4), n: rows.length};
+  }
+  return out;
+}
+function k3Test(learned, attempt){
+  const r = rngFor(S.team, 'k3test'+attempt); const tests = [...Array(30)].map(() => k3Row(r));
+  const res = {};
+  for(const q of Q){
+    const L = learned[q.k]; const truth = CANDS.find(c=>c.n===q.truth);
+    if(!L){ res[q.k] = 0; continue; }
+    const c = CANDS.find(c=>c.n===L.pick);
+    res[q.k] = tests.filter(t => relErr(c.f(t.A,t.a,t.b), truth.f(t.A,t.a,t.b)) < 1e-6).length / tests.length;
+  }
+  return res;
+}
+const k3Score = (res, att) => Math.max(0, Math.round(Q.reduce((a,q)=>a+25*res[q.k],0)) - 10*Math.max(0,att-1));
+function renderK3(){
+  const v = $('#v-k3');
+  if(!S.team){ v.innerHTML = gate(); return; }
+  K3 = k3Data(S.team);
+  const s = S.k3, done = !!s.submitted;
+  v.innerHTML = `
+  <div class="lede">
+    <div><h2>Stroj objevuje vzorce</h2>
+      <p>Stroj umí přečíst rovnici ve tvaru <span class="eq">y = y<sub>m</sub> · sin 2π(<i>a</i>·<i>t</i> − <i>b</i>·<i>x</i>)</span> a vytáhnout z ní čísla <i>a</i> a <i>b</i>. Neví ale, co s nimi dál. Ukažte mu na třech vyřešených úlohách, jak se počítá perioda, frekvence, vlnová délka a rychlost. Stroj si z vašich řešení vybere vzorec, který jim nejlépe odpovídá.</p></div>
+    <div class="learn"><div class="ml"><b>Strojové učení</b>prostor hypotéz, výběr modelu podle chyby, zobecnění, „špatná data = špatný model“</div><div class="fy"><b>Fyzika</b>Úloha 1 z prezentace: T, f, λ a v z rovnice postupné vlny</div></div>
+  </div>
+  <div class="panel">
+    <span class="step">KROK 1 · TRÉNOVACÍ ÚLOHY</span>
+    <h3>Vyřešte tři úlohy za stroj</h3>
+    <p class="sub">Doplňte hodnoty v základních jednotkách SI. Úplně stejně jste řešili Úlohu 1 v prezentaci.</p>
+    <div class="tw"><table><thead><tr><th>Rovnice (x v m, t v s)</th>${Q.map(q=>`<th>${q.n} [${q.u}]</th>`).join('')}</tr></thead>
+    <tbody>${K3.map((r,i) => `<tr><td class="eq" style="font-size:17px;white-space:nowrap">${eqAB(r.A,r.a,r.b)}</td>${Q.map(q=>`<td><input data-k="${q.k}${i}" inputmode="decimal" aria-label="${q.label}, úloha ${i+1}" value="${esc(s.inputs[q.k+i]||'')}" ${done?'disabled':''}></td>`).join('')}</tr>`).join('')}</tbody></table></div>
+    <div class="row" style="margin-top:14px"><button class="btn" id="k3learn" ${done?'disabled':''}>Naučit stroj</button><span class="muted">Stroj zkusí ${CANDS.length} možných vzorců a vybere ten s nejmenší chybou.</span></div>
+  </div>
+  <div id="k3hyp"></div>
+  <div id="k3test"></div>
+  <div id="k3solve"></div>`;
+  $$('#v-k3 td input').forEach(el => el.addEventListener('input', () => { s.inputs[el.dataset.k] = el.value; s.learned = null; save(); k3Paint(); }));
+  $('#k3learn').addEventListener('click', () => { s.learned = k3Learn(); s.lastTest = null; save(); k3Paint(); });
+  k3Paint();
+}
+function k3Paint(){
+  const s = S.k3, L = s.learned, done = !!s.submitted;
+  $('#k3hyp').innerHTML = !L ? '' : `<div class="panel" style="margin-top:24px"><span class="step">KROK 2 · CO SE STROJ NAUČIL</span><h3>Hypotézy a jejich chyba</h3>
+    <p class="sub">Pro každou veličinu vidíte čtyři nejlepší kandidáty. Číslo je průměrná relativní odchylka od vašich řešení. Stroj vybral ten nahoře.</p>
+    <div class="hyps">${Q.map(q => { const x = L[q.k]; return `<div class="hyp"><h4>${I(q.n)} = ${x ? x.pick : '?'}</h4>${x ? `<ol>${x.top.map((t,j)=>`<li class="${j?'':'pick'}">${t.n}<span>${fmt(t.err*100,1)} %</span></li>`).join('')}</ol>${x.err > 0.02 ? `<p class="note bad" style="margin-top:8px">Žádný vzorec nesedí na všechna vaše řešení. Nejsou v nich chyby?</p>` : ''}` : `<p class="muted">Chybí data, stroj se nemá z čeho učit.</p>`}</div>`; }).join('')}</div></div>`;
+  $('#k3test').innerHTML = !L ? '' : `<div class="panel" style="margin-top:24px"><span class="step">KROK 3 · TEST</span><h3>30 úloh, které stroj nikdy neviděl</h3>
+    <p class="sub">Každé další testování stojí 10 bodů. Každá veličina má ve hře 25 bodů. Pokusů zatím: ${s.attempts}.</p>
+    ${done ? '' : `<button class="btn pink" id="k3go">Otestovat stroj</button>`}
+    ${s.lastTest ? `<div class="tw" style="margin-top:14px"><table><thead><tr><th>Veličina</th><th>Stroj se naučil</th><th class="num">Správně</th><th class="num">Body</th></tr></thead><tbody>
+      ${Q.map(q => `<tr><td>${q.label} ${I(q.n)}</td><td class="eq" style="font-size:17px">${L[q.k] ? L[q.k].pick : '—'}</td><td class="num">${Math.round(s.lastTest[q.k]*30)} / 30</td><td class="num">${fmt(25*s.lastTest[q.k],1)}</td></tr>`).join('')}
+      </tbody></table></div>
+      <p class="muted" style="margin-top:10px">Body za kolo: ${Math.round(Q.reduce((a,q)=>a+25*s.lastTest[q.k],0))} − 10 × ${Math.max(0,s.attempts-1)} = <b>${k3Score(s.lastTest, s.attempts)}</b></p>
+      ${done ? `<div style="margin-top:16px">${resultBox(3, s.submitted)}</div>` : `<div class="row" style="margin-top:14px"><button class="btn" id="k3sub">Odevzdat ${k3Score(s.lastTest, s.attempts)} bodů</button><span class="muted">Nebo opravte řešení, stroj znovu naučte a otestujte.</span></div>`}` : ''}
+  </div>`;
+  const g = $('#k3go'); if(g) g.addEventListener('click', () => { s.attempts++; s.lastTest = k3Test(s.learned, s.attempts); save(); k3Paint(); });
+  const sb = $('#k3sub'); if(sb) armConfirm(sb, 'Opravdu odevzdat? Klikněte znovu', () => { const sc = k3Score(s.lastTest, s.attempts); s.submitted = {score:sc, code:scoreCode(S.team,3,sc)}; save(); renderTabs(); renderK3(); });
+  k3Solve();
+}
+function k3Solve(){
+  const s = S.k3, L = s.learned;
+  if(!L){ $('#k3solve').innerHTML = ''; return; }
+  $('#k3solve').innerHTML = `<div class="panel" style="margin-top:24px"><span class="step">BONUS · STROJ ŘEŠÍ LIBOVOLNOU ÚLOHU</span><h3>Zadejte stroji vlastní rovnici</h3>
+    <p class="sub">Předvyplněná je Úloha 1 z prezentace: y = 6 · 10⁻³ · sin 2π(8t − 5x). Zkuste i své vlastní rovnice.</p>
+    <div class="inlineq">y = <input id="s_A" inputmode="decimal" aria-label="amplituda v metrech" value="${esc(s.solve.A)}"> · sin 2π( <input id="s_a" inputmode="decimal" aria-label="a" value="${esc(s.solve.a)}"> <i>t</i> − <input id="s_b" inputmode="decimal" aria-label="b" value="${esc(s.solve.b)}"> <i>x</i> )</div>
+    <dl class="kv" id="s_out" style="margin-top:16px"></dl></div>`;
+  const run = () => {
+    s.solve = {A:$('#s_A').value, a:$('#s_a').value, b:$('#s_b').value}; save();
+    const A = parseNum(s.solve.A), a = parseNum(s.solve.a), b = parseNum(s.solve.b);
+    if(![A,a,b].every(isFinite) || !a || !b){ $('#s_out').innerHTML = `<dt>Stroj</dt><dd>Doplňte tři čísla.</dd>`; return; }
+    $('#s_out').innerHTML = `<dt>amplituda y<sub>m</sub></dt><dd>${fmt(A,5)} m (tu stroj jen opíše)</dd>` + Q.map(q => {
+      const x = L[q.k]; if(!x) return `<dt>${q.label} ${q.n}</dt><dd>neumím, nikdo mě to nenaučil</dd>`;
+      const c = CANDS.find(c=>c.n===x.pick); return `<dt>${q.label} ${q.n}</dt><dd>${q.n} = ${x.pick} = ${fmt(c.f(A,a,b),4)} ${q.u}</dd>`;
+    }).join('');
+  };
+  ['s_A','s_a','s_b'].forEach(id => $('#'+id).addEventListener('input', run)); run();
+}
+
+/* ============ TABULE ============ */
+let B = {};
+try { B = JSON.parse(localStorage.getItem(BKEY) || '{}') || {}; } catch(e){ B = {}; }
+const saveB = () => { try { localStorage.setItem(BKEY, JSON.stringify(B)); } catch(e){} };
+function renderBoard(){
+  const rows = Object.values(B).map(t => ({...t, total:(t.k1||0)+(t.k2||0)+(t.k3||0)})).sort((a,b)=>b.total-a.total);
+  const mine = S.team ? [1,2,3].map(k => S['k'+k].submitted ? `${k}. kolo: <b>${S['k'+k].submitted.score}</b> b. (kód ${S['k'+k].submitted.code})` : `${k}. kolo: neodevzdáno`).join(' · ') : '';
+  $('#v-body').innerHTML = `
+  <div class="lede"><div><h2>Tabule výsledků</h2><p>Tabuli vede učitel na počítači u projektoru. Týmy hlásí název a kód z každého kola. Tabule kód ověří, takže body nejde vymyslet. Záznamy se ukládají jen v tomto prohlížeči.</p></div>
+  ${S.team ? `<div class="note"><b>Váš tým ${esc(S.team)}</b><br>${mine}</div>` : ''}</div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Pořadí</h3>
+      ${rows.length ? `<div class="tw"><table><thead><tr><th class="num">#</th><th>Tým</th><th class="num">1. kolo</th><th class="num">2. kolo</th><th class="num">3. kolo</th><th class="num">Celkem</th></tr></thead><tbody>
+        ${rows.map((r,i)=>`<tr class="${i===0?'win':''}"><td class="num">${i+1}.</td><td>${esc(r.name)}</td><td class="num">${r.k1??'—'}</td><td class="num">${r.k2??'—'}</td><td class="num">${r.k3??'—'}</td><td class="num"><b>${r.total}</b></td></tr>`).join('')}
+      </tbody></table></div>` : `<p class="muted">Zatím žádné výsledky. Zapište první kód vpravo.</p>`}
+    </div>
+    <div class="panel">
+      <h3>Zapsat výsledek</h3>
+      <p class="sub">Název týmu musí být napsaný stejně jako v aplikaci týmu. Na velikosti písmen nezáleží.</p>
+      <form id="bform" class="stack" style="gap:12px">
+        <div class="field"><label for="b_team">Tým</label><input id="b_team" autocomplete="off" style="font-family:var(--body)"></div>
+        <div class="row" style="flex-wrap:nowrap">
+          <div class="field" style="width:110px"><label for="b_round">Kolo</label><select id="b_round" style="width:100%;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--bg)"><option>1</option><option>2</option><option>3</option></select></div>
+          <div class="field" style="flex:1"><label for="b_code">Kód (např. 87-X4QZ)</label><input id="b_code" autocomplete="off"></div>
+        </div>
+        <button class="btn" type="submit">Ověřit a zapsat</button>
+        <p class="muted" id="bmsg" role="status"></p>
+      </form>
+      <div style="margin-top:18px;border-top:1px solid var(--line);padding-top:14px"><button class="btn ghost" id="bclear">Vymazat tabuli</button></div>
+    </div>
+  </div>`;
+  $('#bform').addEventListener('submit', e => {
+    e.preventDefault();
+    const name = $('#b_team').value.trim(), round = $('#b_round').value, code = $('#b_code').value.trim().toUpperCase();
+    const m = code.match(/^(\d{1,3})-([0-9A-Z]{4})$/);
+    if(!name || !m){ $('#bmsg').textContent = 'Zadejte tým a kód ve tvaru číslo-čtyři znaky, např. 87-X4QZ.'; return; }
+    const score = +m[1];
+    if(scoreCode(name, round, score) !== code){ $('#bmsg').textContent = 'Kód nesedí. Zkontrolujte název týmu, číslo kola a kód.'; return; }
+    const key = normTeam(name); B[key] = B[key] || {name}; B[key]['k'+round] = score; saveB(); renderBoard();
+    $('#bmsg').textContent = `Zapsáno: ${name}, ${round}. kolo, ${score} bodů.`;
+  });
+  armConfirm($('#bclear'), 'Opravdu vymazat vše? Klikněte znovu', () => { B = {}; saveB(); renderBoard(); });
+}
+
+/* ============ PRO UČITELE ============ */
+function renderTeacher(){
+  $('#v-ucitel').innerHTML = `
+  <div class="lede"><div><h2>Pro učitele</h2><p>Hodina navazuje na prezentaci <i>Mechanické vlnění II. – Rovnice postupné harmonické vlny</i>. Žáci pracují ve dvojicích až čtveřicích, každý tým na jednom počítači. Nic se neinstaluje, stačí prohlížeč.</p></div>
+  <div class="note">Tuto záložku promítejte až po soutěži. Klíč ke 2. kolu je níže schovaný pod rozbalovacím odkazem.</div></div>
+  <div class="prose">
+    <h3>Průběh hodiny (asi 70 minut)</h3>
+    <ol>
+      <li><b>Úvod, 5 min.</b> Rozdělte třídu do týmů. Každý tým zadá název. Projděte spolu slovníček.</li>
+      <li><b>1. kolo, 15 min.</b> Klasifikace kmitání a vlnění. Klíč: rozhoduje jediný příznak, <i>obsahuje polohu x</i>. Přináší 100 bodů při jednom testu. Příznaky π, minus nebo cos jsou jen pasti. Rovnice typu y = 0,02 · sin 2π(5t − 1,5) je kmitání jednoho bodu vlny a na tu se hodně týmů chytí.</li>
+      <li><b>2. kolo, 20 min.</b> Proložení naměřených dat. Každý tým má vlastní vlnu. Nejlepší postup: nejdřív ručně (T odečíst z pravého grafu, λ z levého), pak doladit strojem s malým krokem. Když tým pustí stroj z hodně špatného odhadu, zasekne se v lokálním minimu. To je dobrá chvíle na diskusi.</li>
+      <li><b>3. kolo, 20 min.</b> Stroj objevuje vzorce. Správně: <i>T</i> = 1/<i>a</i>, <i>f</i> = <i>a</i>, <i>λ</i> = 1/<i>b</i>, <i>v</i> = <i>a</i>/<i>b</i>. Když tým spletl třeba λ = b, stroj se to naučí také a v testu propadne.</li>
+      <li><b>Vyhlášení a diskuse, 10 min.</b> Na tabuli výsledků zapisujte kódy průběžně po každém kole.</li>
+    </ol>
+    <h3>Řešení úloh z prezentace</h3>
+    <ul>
+      <li><b>Úloha 1:</b> y = 6 · 10⁻³ · sin 2π(8t − 5x) → y<sub>m</sub> = 6 mm, f = 8 Hz, T = 0,125 s, λ = 0,2 m, v = λ · f = 1,6 m·s⁻¹.</li>
+      <li><b>Úloha 2:</b> f = 30 Hz, y<sub>m</sub> = 2 cm, v = 3 m·s⁻¹ → λ = v/f = 0,1 m, takže y = 0,02 · sin 2π(30t − 10x) m.</li>
+    </ul>
+    <h3>Otázky do diskuse</h3>
+    <ul>
+      <li>Proč stroj s příznakem „obsahuje π“ nefungoval, i když se π objevuje skoro všude? (Příznak musí <i>rozlišovat</i> třídy, ne jen být častý.)</li>
+      <li>Co se stalo, když byl ve štítcích překlep? Kdo nese odpovědnost za chybu stroje?</li>
+      <li>Proč v 2. kole pomáhá dobrý lidský odhad? Co je lokální minimum?</li>
+      <li>Umí stroj z 3. kola vyřešit Úlohu 2, kde jsou zadané f a v a hledá se rovnice? Proč ne? (Naučil se jen jeden směr úlohy. Neumí zobecnit na jiný typ zadání.)</li>
+      <li>V čem se strojové učení liší od toho, když vzorec prostě naprogramujeme?</li>
+    </ul>
+    <h3>Napojení na protokol v LaTeXu</h3>
+    <p>Každý tým může do protokolu přidat kapitolu o tom, jak se jejich stroj učil. Například:</p>
+    <pre class="code">\\chapter{Jak se učil náš stroj}
+\\begin{center}
+\\begin{tabular}{|c|c|c|}
+    \\hline
+    Kolo &amp; Co stroj dělal &amp; Body \\\\ \\hline
+    1 &amp; klasifikace kmitání / vlnění &amp; 00 \\\\ \\hline
+    2 &amp; proložení dat ($y_m$, $T$, $\\lambda$) &amp; 00 \\\\ \\hline
+    3 &amp; objevení vzorců pro $T, f, \\lambda, v$ &amp; 00 \\\\ \\hline
+\\end{tabular}
+\\end{center}
+Rovnice naší vlny: $y = y_m \\sin 2\\pi\\left(\\frac{t}{T} - \\frac{x}{\\lambda}\\right)$</pre>
+    <h3>Klíč ke 2. kolu</h3>
+    <details class="key"><summary>Zobrazit skutečné hodnoty vlny pro tým</summary>
+      <div class="field" style="margin-top:12px;max-width:320px"><label for="keyteam">Název týmu</label><input id="keyteam" autocomplete="off" style="font-family:var(--body)"></div>
+      <dl class="kv" id="keyout" style="margin-top:12px"></dl>
+    </details>
+    <h3>Jak body vznikají</h3>
+    <ul>
+      <li><b>1. kolo:</b> úspěšnost v % − 10 za každý další test − 3 za každý příznak nad jeden.</li>
+      <li><b>2. kolo:</b> přesnost y<sub>m</sub>, T a λ (max. 3 × 14 b.) + správně vypočtené y<sub>m</sub>, f, v, a, b (10 + 4 × 12 b.) s tolerancí 5 %.</li>
+      <li><b>3. kolo:</b> 25 b. za každou správně naučenou veličinu (podíl správných z 30 testů) − 10 za každý další test.</li>
+    </ul>
+  </div>`;
+  $('#keyteam').addEventListener('input', e => {
+    const t = e.target.value.trim(); if(t.length < 2){ $('#keyout').innerHTML = ''; return; }
+    const d = k2Data(t);
+    $('#keyout').innerHTML = `<dt>y<sub>m</sub></dt><dd>${fmt(d.A,1)} cm = ${fmt(d.A/100,4)} m</dd><dt>T</dt><dd>${fmt(d.T,2)} s</dd><dt>λ</dt><dd>${fmt(d.L,2)} m</dd><dt>f = a</dt><dd>${fmt(1/d.T,3)} Hz</dd><dt>v</dt><dd>${fmt(d.L/d.T,3)} m·s⁻¹</dd><dt>b = 1/λ</dt><dd>${fmt(1/d.L,3)} m⁻¹</dd>`;
+  });
+}
+
+/* ============ start ============ */
+renderTabs();
+go(TABS.some(t=>t.id===S.tab) ? S.tab : 'uvod');
+</script>
+</body>
+</html>
