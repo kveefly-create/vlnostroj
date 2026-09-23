@@ -2,7 +2,7 @@
 
 Naučte stroj fyziku vlnění. Interaktivní soutěž do fyziky pro 2. ročník SŠ (téma *Mechanické vlnění II – rovnice postupné harmonické vlny*), která spojuje základy strojového učení s procvičením rovnice postupné vlny.
 
-**Spustit:** https://kveefly-create.github.io/vlnostroj/
+**Spustit:** https://vlnostroj.vercel.app
 
 ## Kola soutěže
 1. **Kmitání, nebo vlnění?** – klasifikace (perceptron, štítky, příznaky, trénovací a testovací data)
