@@ -254,13 +254,15 @@ const TABS = [
   {id:'k1', t:'1. kolo · Kmitání, nebo vlnění?', r:'k1'},
   {id:'k2', t:'2. kolo · Stroj měří vlnu', r:'k2'},
   {id:'k3', t:'3. kolo · Stroj objevuje vzorce', r:'k3'},
-  {id:'body', t:'Tabule výsledků'},
-  {id:'ucitel', t:'Pro učitele'},
+  {id:'body', t:'Tabule výsledků', lock:true},
+  {id:'ucitel', t:'Pro učitele', lock:true},
 ];
+const LOCK_SVG = '<svg width="12" height="12" viewBox="0 0 12 12" aria-label="zamčeno" style="margin-right:6px;vertical-align:-1px"><rect x="1.5" y="5" width="9" height="6.5" rx="1.5" fill="currentColor"/><path d="M3.5 5V3.5a2.5 2.5 0 0 1 5 0V5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>';
 function renderTabs(){
   $('#tabs').innerHTML = TABS.map(x => {
     const sub = x.r && S[x.r].submitted ? `<span class="pts">${S[x.r].submitted.score} b.</span>` : '';
-    return `<button role="tab" data-tab="${x.id}" aria-selected="${S.tab===x.id}">${x.t}${sub}</button>`;
+    const lk = x.lock && !TEACHER_HTML ? LOCK_SVG : '';
+    return `<button role="tab" data-tab="${x.id}" aria-selected="${S.tab===x.id}">${lk}${x.t}${sub}</button>`;
   }).join('');
   $('#teamtag').innerHTML = S.team ? `Tým: <b>${esc(S.team)}</b>` : 'Tým zatím nezadán';
 }
@@ -737,16 +739,73 @@ function k3Solve(){
   ['s_A','s_a','s_b'].forEach(id => $('#'+id).addEventListener('input', run)); run();
 }
 
+/* ============ UČITELSKÝ ZÁMEK ============ */
+// Obsah záložky Pro učitele je zašifrovaný (AES-GCM, klíč z učitelského kódu přes PBKDF2).
+// Kód samotný ve zdrojáku není; bez něj se text klíče nedá přečíst.
+const TEACHER_BLOB = {"salt":"JtN/DHJIDovmKfUB4IKDGQ==","iv":"qmn1j0jZc5GWvmBf","iter":250000,"ct":"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"};
+const TKEY = 'vlnostroj-ucitel';
+let TEACHER_HTML = null;
+const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const normCode = c => String(c).toUpperCase().replace(/[^0-9A-Z]/g, '');
+async function tryUnlock(code){
+  try {
+    const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(normCode(code)), 'PBKDF2', false, ['deriveKey']);
+    const key = await crypto.subtle.deriveKey({name:'PBKDF2', salt:b64(TEACHER_BLOB.salt), iterations:TEACHER_BLOB.iter, hash:'SHA-256'}, km, {name:'AES-GCM', length:256}, false, ['decrypt']);
+    const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv:b64(TEACHER_BLOB.iv)}, key, b64(TEACHER_BLOB.ct));
+    TEACHER_HTML = new TextDecoder().decode(pt);
+    return true;
+  } catch(e){ return false; }
+}
+function lockView(el, title, what){
+  el.innerHTML = `<div class="gate" style="max-width:540px;margin:0 auto;text-align:left">
+    <h3 style="font-size:26px;margin-bottom:8px">${title} je jen pro učitele</h3>
+    <p class="muted">${what}</p>
+    <form id="lockform" class="teamform" style="margin-top:16px">
+      <div class="field" style="flex:1"><label for="tcode">Učitelský kód</label><input id="tcode" type="password" autocomplete="off" spellcheck="false"></div>
+      <button class="btn" type="submit">Odemknout</button>
+    </form>
+    <label class="chip" style="margin-top:12px"><input type="checkbox" id="tremember" checked> Zapamatovat na tomto počítači</label>
+    <p class="muted" id="tmsg" role="status" style="margin-top:10px"></p>
+  </div>`;
+  $('#lockform').addEventListener('submit', async e => {
+    e.preventDefault();
+    $('#tmsg').textContent = 'Ověřuji kód…';
+    const c = $('#tcode').value;
+    if(await tryUnlock(c)){
+      if($('#tremember').checked){ try { localStorage.setItem(TKEY, c); } catch(err){} }
+      go(S.tab);
+    } else {
+      $('#tmsg').textContent = 'Kód nesedí. Zkontrolujte ho a zkuste to znovu.';
+      $('#tcode').select();
+    }
+  });
+}
+function relockHTML(){ return `<div style="margin-top:28px;border-top:1px solid var(--line);padding-top:16px" class="row"><button class="btn ghost" id="relock">Zamknout učitelské záložky</button><span class="muted">Zamkněte před tím, než počítač předáte žákům.</span></div>`; }
+function wireRelock(){
+  const b = $('#relock'); if(!b) return;
+  b.addEventListener('click', () => { TEACHER_HTML = null; try { localStorage.removeItem(TKEY); } catch(e){} go(S.tab); });
+}
+
 /* ============ TABULE ============ */
 let B = {};
 try { B = JSON.parse(localStorage.getItem(BKEY) || '{}') || {}; } catch(e){ B = {}; }
 const saveB = () => { try { localStorage.setItem(BKEY, JSON.stringify(B)); } catch(e){} };
+function myScoresHTML(){
+  if(!S.team) return '';
+  const mine = [1,2,3].map(k => S['k'+k].submitted ? `${k}. kolo: <b>${S['k'+k].submitted.score}</b> b. (kód ${S['k'+k].submitted.code})` : `${k}. kolo: neodevzdáno`).join(' · ');
+  return `<div class="note"><b>Váš tým ${esc(S.team)}</b><br>${mine}</div>`;
+}
 function renderBoard(){
+  const el = $('#v-body');
+  if(!TEACHER_HTML){
+    el.innerHTML = `${S.team ? `<div style="max-width:540px;margin:0 auto 20px">${myScoresHTML()}</div>` : ''}<div id="lockbox"></div>`;
+    lockView($('#lockbox'), 'Tabule výsledků', 'Pořadí týmů vede učitel u projektoru. Své body a kódy najdete přímo v jednotlivých kolech.');
+    return;
+  }
   const rows = Object.values(B).map(t => ({...t, total:(t.k1||0)+(t.k2||0)+(t.k3||0)})).sort((a,b)=>b.total-a.total);
-  const mine = S.team ? [1,2,3].map(k => S['k'+k].submitted ? `${k}. kolo: <b>${S['k'+k].submitted.score}</b> b. (kód ${S['k'+k].submitted.code})` : `${k}. kolo: neodevzdáno`).join(' · ') : '';
-  $('#v-body').innerHTML = `
-  <div class="lede"><div><h2>Tabule výsledků</h2><p>Tabuli vede učitel na počítači u projektoru. Týmy hlásí název a kód z každého kola. Tabule kód ověří, takže body nejde vymyslet. Záznamy se ukládají jen v tomto prohlížeči.</p></div>
-  ${S.team ? `<div class="note"><b>Váš tým ${esc(S.team)}</b><br>${mine}</div>` : ''}</div>
+  el.innerHTML = `
+  <div class="lede"><div><h2>Tabule výsledků</h2><p>Týmy hlásí název a kód z každého kola. Tabule kód ověří, takže body nejde vymyslet. Záznamy se ukládají jen v tomto prohlížeči.</p></div>
+  ${myScoresHTML()}</div>
   <div class="grid2">
     <div class="panel">
       <h3>Pořadí</h3>
@@ -768,7 +827,8 @@ function renderBoard(){
       </form>
       <div style="margin-top:18px;border-top:1px solid var(--line);padding-top:14px"><button class="btn ghost" id="bclear">Vymazat tabuli</button></div>
     </div>
-  </div>`;
+  </div>
+  ${relockHTML()}`;
   $('#bform').addEventListener('submit', e => {
     e.preventDefault();
     const name = $('#b_team').value.trim(), round = $('#b_round').value, code = $('#b_code').value.trim().toUpperCase();
@@ -780,70 +840,29 @@ function renderBoard(){
     $('#bmsg').textContent = `Zapsáno: ${name}, ${round}. kolo, ${score} bodů.`;
   });
   armConfirm($('#bclear'), 'Opravdu vymazat vše? Klikněte znovu', () => { B = {}; saveB(); renderBoard(); });
+  wireRelock();
 }
 
 /* ============ PRO UČITELE ============ */
 function renderTeacher(){
-  $('#v-ucitel').innerHTML = `
-  <div class="lede"><div><h2>Pro učitele</h2><p>Hodina navazuje na prezentaci <i>Mechanické vlnění II. – Rovnice postupné harmonické vlny</i>. Žáci pracují ve dvojicích až čtveřicích, každý tým na jednom počítači. Nic se neinstaluje, stačí prohlížeč.</p></div>
-  <div class="note">Tuto záložku promítejte až po soutěži. Klíč ke 2. kolu je níže schovaný pod rozbalovacím odkazem.</div></div>
-  <div class="prose">
-    <h3>Průběh hodiny (asi 70 minut)</h3>
-    <ol>
-      <li><b>Úvod, 5 min.</b> Rozdělte třídu do týmů. Každý tým zadá název. Projděte spolu slovníček.</li>
-      <li><b>1. kolo, 15 min.</b> Klasifikace kmitání a vlnění. Klíč: rozhoduje jediný příznak, <i>obsahuje polohu x</i>. Přináší 100 bodů při jednom testu. Příznaky π, minus nebo cos jsou jen pasti. Rovnice typu y = 0,02 · sin 2π(5t − 1,5) je kmitání jednoho bodu vlny a na tu se hodně týmů chytí.</li>
-      <li><b>2. kolo, 20 min.</b> Proložení naměřených dat. Každý tým má vlastní vlnu. Nejlepší postup: nejdřív ručně (T odečíst z pravého grafu, λ z levého), pak doladit strojem s malým krokem. Když tým pustí stroj z hodně špatného odhadu, zasekne se v lokálním minimu. To je dobrá chvíle na diskusi.</li>
-      <li><b>3. kolo, 20 min.</b> Stroj objevuje vzorce. Správně: <i>T</i> = 1/<i>a</i>, <i>f</i> = <i>a</i>, <i>λ</i> = 1/<i>b</i>, <i>v</i> = <i>a</i>/<i>b</i>. Když tým spletl třeba λ = b, stroj se to naučí také a v testu propadne.</li>
-      <li><b>Vyhlášení a diskuse, 10 min.</b> Na tabuli výsledků zapisujte kódy průběžně po každém kole.</li>
-    </ol>
-    <h3>Řešení úloh z prezentace</h3>
-    <ul>
-      <li><b>Úloha 1:</b> y = 6 · 10⁻³ · sin 2π(8t − 5x) → y<sub>m</sub> = 6 mm, f = 8 Hz, T = 0,125 s, λ = 0,2 m, v = λ · f = 1,6 m·s⁻¹.</li>
-      <li><b>Úloha 2:</b> f = 30 Hz, y<sub>m</sub> = 2 cm, v = 3 m·s⁻¹ → λ = v/f = 0,1 m, takže y = 0,02 · sin 2π(30t − 10x) m.</li>
-    </ul>
-    <h3>Otázky do diskuse</h3>
-    <ul>
-      <li>Proč stroj s příznakem „obsahuje π“ nefungoval, i když se π objevuje skoro všude? (Příznak musí <i>rozlišovat</i> třídy, ne jen být častý.)</li>
-      <li>Co se stalo, když byl ve štítcích překlep? Kdo nese odpovědnost za chybu stroje?</li>
-      <li>Proč v 2. kole pomáhá dobrý lidský odhad? Co je lokální minimum?</li>
-      <li>Umí stroj z 3. kola vyřešit Úlohu 2, kde jsou zadané f a v a hledá se rovnice? Proč ne? (Naučil se jen jeden směr úlohy. Neumí zobecnit na jiný typ zadání.)</li>
-      <li>V čem se strojové učení liší od toho, když vzorec prostě naprogramujeme?</li>
-    </ul>
-    <h3>Napojení na protokol v LaTeXu</h3>
-    <p>Každý tým může do protokolu přidat kapitolu o tom, jak se jejich stroj učil. Například:</p>
-    <pre class="code">\\chapter{Jak se učil náš stroj}
-\\begin{center}
-\\begin{tabular}{|c|c|c|}
-    \\hline
-    Kolo &amp; Co stroj dělal &amp; Body \\\\ \\hline
-    1 &amp; klasifikace kmitání / vlnění &amp; 00 \\\\ \\hline
-    2 &amp; proložení dat ($y_m$, $T$, $\\lambda$) &amp; 00 \\\\ \\hline
-    3 &amp; objevení vzorců pro $T, f, \\lambda, v$ &amp; 00 \\\\ \\hline
-\\end{tabular}
-\\end{center}
-Rovnice naší vlny: $y = y_m \\sin 2\\pi\\left(\\frac{t}{T} - \\frac{x}{\\lambda}\\right)$</pre>
-    <h3>Klíč ke 2. kolu</h3>
-    <details class="key"><summary>Zobrazit skutečné hodnoty vlny pro tým</summary>
-      <div class="field" style="margin-top:12px;max-width:320px"><label for="keyteam">Název týmu</label><input id="keyteam" autocomplete="off" style="font-family:var(--body)"></div>
-      <dl class="kv" id="keyout" style="margin-top:12px"></dl>
-    </details>
-    <h3>Jak body vznikají</h3>
-    <ul>
-      <li><b>1. kolo:</b> úspěšnost v % − 10 za každý další test − 3 za každý příznak nad jeden.</li>
-      <li><b>2. kolo:</b> přesnost y<sub>m</sub>, T a λ (max. 3 × 14 b.) + správně vypočtené y<sub>m</sub>, f, v, a, b (10 + 4 × 12 b.) s tolerancí 5 %.</li>
-      <li><b>3. kolo:</b> 25 b. za každou správně naučenou veličinu (podíl správných z 30 testů) − 10 za každý další test.</li>
-    </ul>
-  </div>`;
+  const el = $('#v-ucitel');
+  if(!TEACHER_HTML){ lockView(el, 'Tato záložka', 'Metodika, řešení a klíč k soutěži se zobrazí po zadání učitelského kódu.'); return; }
+  el.innerHTML = TEACHER_HTML + relockHTML();
   $('#keyteam').addEventListener('input', e => {
     const t = e.target.value.trim(); if(t.length < 2){ $('#keyout').innerHTML = ''; return; }
     const d = k2Data(t);
     $('#keyout').innerHTML = `<dt>y<sub>m</sub></dt><dd>${fmt(d.A,1)} cm = ${fmt(d.A/100,4)} m</dd><dt>T</dt><dd>${fmt(d.T,2)} s</dd><dt>λ</dt><dd>${fmt(d.L,2)} m</dd><dt>f = a</dt><dd>${fmt(1/d.T,3)} Hz</dd><dt>v</dt><dd>${fmt(d.L/d.T,3)} m·s⁻¹</dd><dt>b = 1/λ</dt><dd>${fmt(1/d.L,3)} m⁻¹</dd>`;
   });
+  wireRelock();
 }
 
 /* ============ start ============ */
 renderTabs();
 go(TABS.some(t=>t.id===S.tab) ? S.tab : 'uvod');
+(async () => {
+  let c = null; try { c = localStorage.getItem(TKEY); } catch(e){}
+  if(c && await tryUnlock(c)){ renderTabs(); if(S.tab === 'body' || S.tab === 'ucitel') go(S.tab); }
+})();
 </script>
 </body>
 </html>
